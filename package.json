@@ -9,9 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/imagemin": "^8.0.1",
+    "imagemin": "^8.0.1",
+    "imagemin-jpeg-recompress": "^7.1.0",
+    "imagemin-pngquant": "^9.0.2",
+    "lucide": "^0.284.0",
+    "next": "13.5.4",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "13.5.4"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "typescript": "^5",
