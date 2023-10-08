@@ -57,7 +57,7 @@ html {
 
 body {
   background-color: skyblue;
-  background-image: url("../img/clouds.jpg");
+  background-image: url("/clouds.jpg");
   background-size: cover;
   background-blend-mode: overlay;
   min-height: 100vh;

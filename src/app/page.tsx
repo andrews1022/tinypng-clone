@@ -1,9 +1,7 @@
+import { Compressor } from "@/components/compressor";
+
 const HomePage = () => {
-  return (
-    <div>
-      <h1>HomePage</h1>
-    </div>
-  );
+  return <Compressor />;
 };
 
 export default HomePage;
