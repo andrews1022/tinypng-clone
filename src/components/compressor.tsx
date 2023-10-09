@@ -55,6 +55,7 @@ const Compressor = () => {
           const newSize = compressedImageFile.size;
           const reduction = ((orginalSize - newSize) / orginalSize) * 100;
 
+          // set results in such a way that the last result is not used for all of them
           setResults((previousResults) => {
             const fileIndex = previousResults.findIndex((result) => result.fileName === fileName);
             const newResults = [...previousResults];
