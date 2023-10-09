@@ -6,13 +6,7 @@ import { useState } from "react";
 
 import { type DragEvent } from "react";
 
-type OriginalImage = {
-  file: File;
-  fileName: string;
-  fileSizeString: string;
-};
-
-type NewImage = {
+type Result = {
   originalFile: File;
   newFile: File;
   fileName: string;
@@ -26,9 +20,7 @@ const Compressor = () => {
   const [failedToCompress, setFailedToCompress] = useState(false);
   const [isCompressing, setIsCompressing] = useState(true);
   const [isActive, setIsActive] = useState(false);
-
-  const [files, setFiles] = useState();
-  const [results, setResults] = useState<NewImage[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
 
   const uploadFile = async (file: File, fileName: string) => {
     const reader = new FileReader();
@@ -74,6 +66,8 @@ const Compressor = () => {
     const filesArray = Array.from(files);
 
     filesArray.forEach((file) => {
+      // setCounter((prevCounter) => (prevCounter += 1));
+
       if (file.size > 4 * 1024 * 1024) {
         return alert("File over 4 MB");
       }
@@ -126,6 +120,24 @@ const Compressor = () => {
     setIsActive(false);
   };
 
+  const handleClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+
+    input.onchange = (event) => {
+      const inputElement = event.target as HTMLInputElement;
+      const images = inputElement.files;
+
+      if (images) {
+        handleFiles(images);
+      }
+    };
+
+    input.click();
+  };
+
   return (
     <>
       <section
@@ -134,6 +146,7 @@ const Compressor = () => {
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
+        onClick={handleClick}
       >
         <Download size={55} />
         <p>Drop your WebP, PNG or JPEG files here!</p>

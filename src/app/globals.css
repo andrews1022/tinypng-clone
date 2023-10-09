@@ -84,11 +84,18 @@ header {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 384px;
+  width: 430px;
   max-width: 100%;
-  height: 160px;
   border: 2px dashed grey;
   border-radius: 15px;
+  padding: 2rem 0;
+  cursor: pointer;
+  transition: color 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+.droparea:hover {
+  color: #616778;
+  border-color: #9a9fad;
 }
 
 .droparea i {
