@@ -1,8 +1,11 @@
 "use client";
 
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import { Download, DownloadCloud } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { compressFile, getFileSizeString } from "@/lib/utils";
-import { Download } from "lucide-react";
-import { useState } from "react";
 
 import { type DragEvent } from "react";
 
@@ -21,6 +24,20 @@ const Compressor = () => {
   const [isCompressing, setIsCompressing] = useState(true);
   const [isActive, setIsActive] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
+  const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
+
+  useEffect(() => {
+    // Check if all images are done compressing
+    const compressingImages = results.filter((result) => !result.newFileSizeString);
+
+    if (compressingImages.length === 0 && results.length > 0) {
+      setAllImagesDoneCompressing(true);
+    } else {
+      setAllImagesDoneCompressing(false);
+    }
+  }, [results]); // useEffect will run whenever results state changes
+  // explaination of above:
+  // In this code, the useEffect hook runs whenever the results state changes. It filters the results array to find images that are still compressing (where newFileSizeString is an empty string). If there are no compressing images and the results array is not empty, it means all images are done compressing, and setAllImagesDoneCompressing(true) is called. Otherwise, setAllImagesDoneCompressing(false) is set. This ensures that allImagesDoneCompressing reflects the correct state based on the compression status of all images.
 
   const uploadFile = async (file: File, fileName: string) => {
     const reader = new FileReader();
@@ -138,6 +155,18 @@ const Compressor = () => {
     input.click();
   };
 
+  const handleDownloadAll = () => {
+    const zip = new JSZip();
+
+    results.forEach((result) => {
+      zip.file(result.fileName, result.newFile);
+    });
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, "tinified.zip");
+    });
+  };
+
   return (
     <>
       <section
@@ -192,6 +221,14 @@ const Compressor = () => {
               );
             })}
           </ul>
+        </section>
+      ) : null}
+
+      {allImagesDoneCompressing ? (
+        <section className="download-buttons">
+          <button className="results__download-all" onClick={handleDownloadAll}>
+            <DownloadCloud /> Download All
+          </button>
         </section>
       ) : null}
     </>

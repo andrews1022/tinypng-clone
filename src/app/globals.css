@@ -160,8 +160,6 @@ header {
 }
 
 .results__bar {
-  -webkit-appearance: none;
-  appearance: none;
   width: 33%;
   max-width: 292px;
   height: 30px;
@@ -278,6 +276,34 @@ header {
 .results__download a:active,
 .results__download a:visited {
   color: #333;
+}
+
+.results__download-all {
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-bottom: 0.3rem solid #788990;
+  border-radius: 0.2rem;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #0aa574;
+  border-bottom-color: #029365;
+  text-shadow: 0.1rem 0.1rem 0 #018259;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.results__download-all:hover {
+  background-color: #02c487;
+  border-bottom-color: #029c6b;
+}
+
+.download-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .results__saved {

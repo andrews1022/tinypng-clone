@@ -1,8 +1,3 @@
-import imagemin from "imagemin";
-import imageminJpegRecompress from "imagemin-jpeg-recompress";
-import imageminPngquant from "imagemin-pngquant";
-import pngquant from "pngquant-bin";
-
 import { NextRequest, NextResponse } from "next/server";
 
 type UploadedImage = {
