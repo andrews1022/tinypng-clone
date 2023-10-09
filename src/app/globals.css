@@ -102,7 +102,7 @@ header {
 }
 
 .green-border {
-  border-color: green;
+  border-color: #00c300;
 }
 
 /*==== results section ====*/
@@ -215,7 +215,7 @@ header {
 
 .results__size {
   display: none;
-  color: rgb(126, 182, 49);
+  color: #7eb631;
   font-size: 0.7rem;
   font-weight: lighter;
   min-width: 52px;
