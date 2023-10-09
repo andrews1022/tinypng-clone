@@ -6,7 +6,7 @@ const defaultOptions: Options = {
   maxWidthOrHeight: 1920,
   useWebWorker: true,
   maxIteration: 10,
-  initialQuality: 0.5,
+  initialQuality: 0.3,
   exifOrientation: 1
 };
 
@@ -14,4 +14,10 @@ const compressFile = (imageFile: File, options = defaultOptions) => {
   return imageCompression(imageFile, options);
 };
 
-export { compressFile };
+const getFileSizeString = (fileSize: number) => {
+  const sizeInKB = fileSize / 1024;
+  const sizeInMB = sizeInKB / 1024;
+  return sizeInKB > 1024 ? `${sizeInMB.toFixed(1)} MB` : `${sizeInKB.toFixed(1)} KB`;
+};
+
+export { compressFile, getFileSizeString };
