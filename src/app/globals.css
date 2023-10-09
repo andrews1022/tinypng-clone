@@ -126,7 +126,7 @@ header {
   justify-content: space-between;
   font-size: 0.8rem;
   margin: 4px;
-  padding: 0 0.3rem;
+  padding: 0.5rem;
   border: 1px solid rgb(207, 219, 222);
   background-color: rgb(240, 240, 240);
 }
@@ -159,6 +159,36 @@ header {
   max-width: 292px;
   height: 30px;
   position: relative;
+  border-radius: 2rem;
+}
+
+:root {
+  --compressing: #f3d216;
+}
+
+.results__bar--compressing {
+  background: var(--compressing);
+  animation: compressing 2s linear infinite;
+}
+
+@keyframes compressing {
+  0% {
+    background: var(--compressing);
+  }
+  50% {
+    background: #fff;
+  }
+  100% {
+    background: var(--compressing);
+  }
+}
+
+.results__bar--complete {
+  background: #6fe508;
+}
+
+.results__bar--error {
+  background: #f33737;
 }
 
 ::-moz-progress-bar {
@@ -217,7 +247,6 @@ header {
   display: none;
   color: #7eb631;
   font-size: 0.7rem;
-  font-weight: lighter;
   min-width: 52px;
 }
 

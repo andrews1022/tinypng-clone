@@ -10,11 +10,14 @@
   },
   "dependencies": {
     "@types/imagemin": "^8.0.1",
+    "@types/pngquant-bin": "^4.0.0",
+    "browser-image-compression": "^2.0.2",
     "imagemin": "^8.0.1",
     "imagemin-jpeg-recompress": "^7.1.0",
     "imagemin-pngquant": "^9.0.2",
     "lucide-react": "^0.284.0",
     "next": "13.5.4",
+    "pngquant-bin": "^8.0.1",
     "react": "^18",
     "react-dom": "^18"
   },
