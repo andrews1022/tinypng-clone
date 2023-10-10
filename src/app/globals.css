@@ -322,13 +322,6 @@ header {
   border-bottom-color: #0575d1;
 }
 
-.download-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
-
 .totals {
   width: 26rem;
   z-index: 8;
