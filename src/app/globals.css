@@ -52,7 +52,7 @@ h6 {
 html {
   font-size: 18px;
   font-family: Arial, Helvetica, sans-serif;
-  color: #333;
+  color: #000;
 }
 
 body {
@@ -86,7 +86,7 @@ header {
   align-items: center;
   width: 430px;
   max-width: 100%;
-  border: 2px dashed grey;
+  border: 2px dashed #000;
   border-radius: 15px;
   padding: 2rem 0;
   transition: color 0.2s ease-out, border-color 0.2s ease-out;
@@ -100,7 +100,7 @@ header {
 
 .droparea:hover {
   /* color: #616778; */
-  border-color: #00c300;
+  border-color: #f59e0b;
 }
 
 .droparea i {
@@ -114,7 +114,7 @@ header {
 }
 
 .droparea--in-use {
-  border-color: #00c300;
+  border-color: #f59e0b;
 }
 
 /* .green-border {
