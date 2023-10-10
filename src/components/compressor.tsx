@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { compressFile, getFileSizeString } from "@/lib/utils";
 
-import type { DragEvent } from "react";
+import type { ChangeEvent, DragEvent } from "react";
 import type { Result } from "@/types";
 
 declare global {
@@ -16,11 +16,15 @@ declare global {
   }
 }
 
+// constants
+const MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE = 20;
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+
 const Compressor = () => {
   // state
   const [failedToCompress, setFailedToCompress] = useState(false);
   const [isCompressing, setIsCompressing] = useState(true);
-  const [isActive, setIsActive] = useState(false);
+  const [dropAreaInUse, setDropAreaInUse] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
 
@@ -41,6 +45,13 @@ const Compressor = () => {
   }, [results]); // useEffect will run whenever results state changes
   // explaination of above:
   // In this code, the useEffect hook runs whenever the results state changes. It filters the results array to find images that are still compressing (where newFileSizeString is an empty string). If there are no compressing images and the results array is not empty, it means all images are done compressing, and setAllImagesDoneCompressing(true) is called. Otherwise, setAllImagesDoneCompressing(false) is set. This ensures that allImagesDoneCompressing reflects the correct state based on the compression status of all images.
+
+  const checkIfTooManyFiles = (files: FileList) => {
+    if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
+      setDropAreaInUse(false);
+      return alert("Too many files! Please upload no more than 20 files at once.");
+    }
+  };
 
   const uploadFile = async (file: File, fileName: string) => {
     const reader = new FileReader();
@@ -89,7 +100,7 @@ const Compressor = () => {
     const filesArray = Array.from(files);
 
     filesArray.forEach((file) => {
-      if (file.size > 4 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         return alert(
           `${file.name} is too large! The max file size is 4 MB. It will not be compressed.`
         );
@@ -113,52 +124,38 @@ const Compressor = () => {
     });
   };
 
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (event: DragEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const images = event.dataTransfer.files;
+    const { files } = event.dataTransfer;
 
-    if (images.length > 20) {
-      setIsActive(false);
+    if (files) {
+      checkIfTooManyFiles(files);
 
-      return alert("Too many files!");
+      handleFiles(files);
+
+      setDropAreaInUse(false);
     }
-
-    handleFiles(images);
-    setIsActive(false);
   };
 
-  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setIsActive(true);
+
+    const { files } = event.target;
+
+    if (files) {
+      checkIfTooManyFiles(files);
+
+      handleFiles(files);
+
+      setDropAreaInUse(false);
+    }
   };
 
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+  // reusable function to handle drag events
+  const handleDragEvents = (event: DragEvent<HTMLFormElement>, dropAreaInUse: boolean) => {
     event.preventDefault();
-    setIsActive(true);
-  };
-
-  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsActive(false);
-  };
-
-  const handleClick = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.multiple = true;
-
-    input.onchange = (event) => {
-      const inputElement = event.target as HTMLInputElement;
-      const images = inputElement.files;
-
-      if (images) {
-        handleFiles(images);
-      }
-    };
-
-    input.click();
+    setDropAreaInUse(dropAreaInUse);
   };
 
   const totalPercentSaved = results
@@ -216,18 +213,31 @@ const Compressor = () => {
 
   return (
     <>
-      <section
-        className={`droparea ${isActive ? "droparea--in-use" : ""}`}
+      <form
+        className={`droparea ${dropAreaInUse ? "droparea--in-use" : ""}`}
         onDrop={handleDrop}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={handleClick}
+        onDragEnter={(event) => handleDragEvents(event, true)}
+        onDragOver={(event) => handleDragEvents(event, true)}
+        onDragLeave={(event) => handleDragEvents(event, false)}
       >
         <Download size={55} />
-        <p>Drop your WebP, PNG or JPEG files here!</p>
+
+        <label htmlFor="select-images">
+          Drag and drop or{" "}
+          <span className="text-amber-500 font-semibold">click here to browse</span>
+        </label>
+
+        <input
+          type="file"
+          id="select-images"
+          name="select-images"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleChange}
+        />
         <small>Up to 20 images, max 4 MB each.</small>
-      </section>
+      </form>
 
       {results.length ? (
         <section className="results">
