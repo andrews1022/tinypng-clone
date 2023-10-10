@@ -9,6 +9,7 @@ import { compressFile, getFileSizeString } from "@/lib/utils";
 
 import type { ChangeEvent, DragEvent } from "react";
 import type { Result } from "@/types";
+import { DropArea } from "./drop-area";
 
 declare global {
   interface Window {
@@ -28,7 +29,7 @@ const Compressor = () => {
   const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
 
   useEffect(() => {
-    // Check if all images are done compressing
+    // check if all images are done compressing
     const compressingImages = results.filter((result) => !result.newFileSizeString);
 
     if (!compressingImages.length && results.length) {
@@ -42,7 +43,7 @@ const Compressor = () => {
       setAllImagesDoneCompressing(false);
     };
   }, [results]); // useEffect will run whenever results state changes
-  // explaination of above:
+  // explaination of useEffect above:
   // In this code, the useEffect hook runs whenever the results state changes. It filters the results array to find images that are still compressing (where newFileSizeString is an empty string). If there are no compressing images and the results array is not empty, it means all images are done compressing, and setAllImagesDoneCompressing(true) is called. Otherwise, setAllImagesDoneCompressing(false) is set. This ensures that allImagesDoneCompressing reflects the correct state based on the compression status of all images.
 
   const checkIfTooManyFiles = (files: FileList) => {
@@ -220,31 +221,12 @@ const Compressor = () => {
 
   return (
     <>
-      <form
-        className={`droparea ${dropAreaInUse ? "droparea--in-use" : ""}`}
-        onDrop={handleDrop}
-        onDragEnter={(event) => handleDragEvents(event, true)}
-        onDragOver={(event) => handleDragEvents(event, true)}
-        onDragLeave={(event) => handleDragEvents(event, false)}
-      >
-        <Download size={55} />
-
-        <label htmlFor="select-images">
-          Drag and drop or{" "}
-          <span className="text-amber-500 font-semibold">click here to browse</span>
-        </label>
-
-        <input
-          type="file"
-          id="select-images"
-          name="select-images"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleChange}
-        />
-        <small>Up to 20 images, max 4 MB each.</small>
-      </form>
+      <DropArea
+        dropAreaInUse={dropAreaInUse}
+        handleChange={handleChange}
+        handleDragEvents={handleDragEvents}
+        handleDrop={handleDrop}
+      />
 
       {results.length ? (
         <section className="results">
