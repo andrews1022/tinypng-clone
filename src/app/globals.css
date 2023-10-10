@@ -282,6 +282,7 @@ header {
   display: flex;
   align-items: center;
   flex: 1;
+  gap: 0.5rem;
 }
 
 .results__download-buttons {
@@ -298,7 +299,7 @@ header {
 
 .results__download a {
   cursor: pointer;
-  padding-left: 0.3rem;
+  /* padding-left: 0.3rem; */
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -312,7 +313,8 @@ header {
 }
 
 .results__percent-saved {
-  margin-left: 1rem;
+  /* margin-left: 1rem; */
+  min-width: 4rem;
 }
 
 .results__download-all {

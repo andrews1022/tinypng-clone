@@ -23,7 +23,7 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 const Compressor = () => {
   // state
   const [failedToCompress, setFailedToCompress] = useState(false);
-  const [isCompressing, setIsCompressing] = useState(true);
+  // const [isCompressing, setIsCompressing] = useState(true);
   const [dropAreaInUse, setDropAreaInUse] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
@@ -80,13 +80,14 @@ const Compressor = () => {
               newFileSizeString: getFileSizeString(newSize),
               originalFile: file,
               originalFileSizeString: getFileSizeString(orginalSize),
-              percentSaved: reduction.toFixed(2)
+              percentSaved: parseFloat(reduction.toFixed(2)),
+              isCompressing: false
             };
 
             return newResults;
           });
 
-          setIsCompressing(false);
+          // setIsCompressing(false);
         } catch (error) {
           console.error(error);
         }
@@ -99,7 +100,16 @@ const Compressor = () => {
   const handleFiles = (files: FileList) => {
     const filesArray = Array.from(files);
 
+    // setIsCompressing(true);
+
     filesArray.forEach((file) => {
+      // Check if the file is already in the results array (has been compressed)
+      const isAlreadyCompressed = results.some((result) => result.fileName === file.name);
+
+      if (isAlreadyCompressed) {
+        return; // Skip files that have already been compressed
+      }
+
       if (file.size > MAX_FILE_SIZE) {
         return alert(
           `${file.name} is too large! The max file size is 4 MB. It will not be compressed.`
@@ -116,7 +126,8 @@ const Compressor = () => {
           fileName,
           originalFileSizeString: getFileSizeString(file.size),
           newFileSizeString: "",
-          percentSaved: "0"
+          percentSaved: 0,
+          isCompressing: true // Set isCompressing to true for newly added files
         }
       ]);
 
@@ -160,7 +171,7 @@ const Compressor = () => {
 
   const totalPercentSaved = results
     .reduce((total, result) => {
-      return total + parseFloat(result.percentSaved);
+      return total + result.percentSaved;
     }, 0)
     .toFixed(2);
   // In this code, totalPercentSaved is calculated by using the reduce function on the results array. It adds up the individual percentSaved values for each image and formats the result to have 2 decimal places.
@@ -251,21 +262,23 @@ const Compressor = () => {
 
                     <span
                       className={`results__bar results__bar--${
-                        isCompressing ? "compressing" : "complete"
+                        result.isCompressing ? "compressing" : "complete"
                       } ${failedToCompress ? "results__bar--error" : undefined}`}
                     >
-                      {isCompressing ? "Compressing..." : "Complete!"}
+                      {result.isCompressing ? "Compressing..." : "Complete!"}
                     </span>
 
                     <div className="results__compressed">
                       <p className="results__new-size">{result.newFileSizeString}</p>
 
-                      {!isCompressing ? (
-                        <p className="results__download">
-                          <a href={URL.createObjectURL(result.newFile)} download={result.fileName}>
-                            Download
-                          </a>
-                        </p>
+                      {!result.isCompressing ? (
+                        <a
+                          href={URL.createObjectURL(result.newFile)}
+                          download={result.fileName}
+                          className="results__download"
+                        >
+                          Download
+                        </a>
                       ) : null}
 
                       <p className="results__percent-saved">{`-${result.percentSaved}%`}</p>
@@ -278,25 +291,25 @@ const Compressor = () => {
         </section>
       ) : null}
 
-      {allImagesDoneCompressing ? (
-        <section className="results__download-buttons">
-          <button className="results__dropbox" onClick={handleSaveToDropbox}>
-            <Box /> Save to Dropbox
-          </button>
-
-          <button className="results__download-all" onClick={handleDownloadAll}>
-            <DownloadCloud /> Download All
-          </button>
-        </section>
-      ) : null}
-
       {allImagesDoneCompressing && results.length ? (
-        <section className="totals">
-          <p className="totals__message">
-            We just saved you <span className="totals__percent">{totalPercentSaved}%</span>
-            <span className="totals__size-saved">{getFileSizeString(totalSizeSaved)} total</span>
-          </p>
-        </section>
+        <>
+          <section className="results__download-buttons">
+            <button className="results__dropbox" onClick={handleSaveToDropbox}>
+              <Box /> Save to Dropbox
+            </button>
+
+            <button className="results__download-all" onClick={handleDownloadAll}>
+              <DownloadCloud /> Download All
+            </button>
+          </section>
+
+          <section className="totals">
+            <p className="totals__message">
+              We just saved you <span className="totals__percent">{totalPercentSaved}%</span>
+              <span className="totals__size-saved">{getFileSizeString(totalSizeSaved)} total</span>
+            </p>
+          </section>
+        </>
       ) : null}
     </>
   );
