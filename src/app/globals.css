@@ -89,13 +89,18 @@ header {
   border: 2px dashed grey;
   border-radius: 15px;
   padding: 2rem 0;
-  cursor: pointer;
   transition: color 0.2s ease-out, border-color 0.2s ease-out;
 }
 
+/* droparea and any of its child elements */
+.droparea,
+.droparea * {
+  cursor: pointer;
+}
+
 .droparea:hover {
-  color: #616778;
-  border-color: #9a9fad;
+  /* color: #616778; */
+  border-color: #00c300;
 }
 
 .droparea i {
@@ -108,9 +113,13 @@ header {
   font-size: 0.8rem;
 }
 
-.green-border {
+.droparea--in-use {
   border-color: #00c300;
 }
+
+/* .green-border {
+  border-color: #00c300;
+} */
 
 /*==== results section ====*/
 
