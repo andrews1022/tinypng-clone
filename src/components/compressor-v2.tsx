@@ -21,12 +21,11 @@ type FileReadyForCompressing = {
   large: boolean;
   name: string;
   size: number;
-  type: string;
 };
 
 type CompressedFile = {
   failedToCompress: boolean;
-  fileName: string;
+  name: string;
   newFile: File;
   newFileSizeString: string;
   originalFile: File;
@@ -40,8 +39,10 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
 const CompressorV2 = () => {
   // state
-  const [compressedImages, setCompressedImages] = useState<CompressedFile[]>([]);
   const [dropAreaInUse, setDropAreaInUse] = useState(false);
+  const [compressedFiles, setCompressedFiles] = useState<CompressedFile[]>([]);
+  const [filesBeingCompressed, setFilesBeingCompressed] = useState<FileReadyForCompressing[]>([]);
+  // const [compressionResults, setCompressionResults] = useState([]);
   const [isCompressing, setIsCompressing] = useState(true);
 
   const checkIfTooManyFiles = (files: FileList) => {
@@ -53,16 +54,16 @@ const CompressorV2 = () => {
 
   const uploadFile = async (fileToCompress: FileReadyForCompressing) => {
     const reader = new FileReader();
-    const { file, large, name, size, type } = fileToCompress;
+    const { file, large, name, size } = fileToCompress;
 
     reader.addEventListener("loadend", async (event) => {
       try {
         // check if large is true
-        // if it is, don't compress, just add to compressedImages state
+        // if it is, don't compress, just add to compressedFiles state
         if (large) {
-          const compressedImage: CompressedFile = {
+          const compressed: CompressedFile = {
             failedToCompress: true,
-            fileName: name,
+            name,
             newFile: file,
             newFileSizeString: getFileSizeString(size),
             originalFile: file,
@@ -70,12 +71,11 @@ const CompressorV2 = () => {
             percentSaved: 0
           };
 
-          setCompressedImages((previousCompressedImages) => [
-            ...previousCompressedImages,
-            compressedImage
-          ]);
+          setCompressedFiles((previouscompressedFiles) => [...previouscompressedFiles, compressed]);
           return;
         }
+
+        setIsCompressing(true);
 
         const compressedFile = await compressFile(file);
 
@@ -83,9 +83,9 @@ const CompressorV2 = () => {
         const newSize = compressedFile.size;
         const reduction = ((orginalSize - newSize) / orginalSize) * 100;
 
-        const compressedImage: CompressedFile = {
+        const compressed: CompressedFile = {
           failedToCompress: false,
-          fileName: name,
+          name,
           newFile: compressedFile,
           newFileSizeString: getFileSizeString(newSize),
           originalFile: file,
@@ -93,11 +93,10 @@ const CompressorV2 = () => {
           percentSaved: parseFloat(reduction.toFixed(2))
         };
 
-        setCompressedImages((previousCompressedImages) => [
-          ...previousCompressedImages,
-          compressedImage
-        ]);
+        setCompressedFiles((previouscompressedFiles) => [...previouscompressedFiles, compressed]);
         setIsCompressing(false);
+
+        return;
       } catch (error) {
         console.error("Error compressing file: ", error);
       }
@@ -114,17 +113,10 @@ const CompressorV2 = () => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
-    // console.log(files);
 
     if (files) {
-      // if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
-      //   setDropAreaInUse(false);
-      //   return alert("Too many files! Please upload no more than 20 files at once.");
-      // }
-
       checkIfTooManyFiles(files);
 
-      // prepare files for compression
       const preppedFiles: FileReadyForCompressing[] = Array.from(files).map((file) => {
         const { name, size, type } = file;
 
@@ -137,9 +129,9 @@ const CompressorV2 = () => {
         };
       });
 
-      // setImagesReadyToCompress(preppedFiles);
-
+      setFilesBeingCompressed(preppedFiles);
       setDropAreaInUse(false);
+
       handleFiles(preppedFiles);
     }
   };
@@ -148,32 +140,27 @@ const CompressorV2 = () => {
     event.preventDefault();
 
     const { files } = event.dataTransfer;
-    // console.log(files);
 
-    // if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
-    //   setDropAreaInUse(false);
-    //   return alert("Too many files! Please upload no more than 20 files at once.");
-    // }
+    if (files) {
+      checkIfTooManyFiles(files);
 
-    checkIfTooManyFiles(files);
+      // prepare files for compression
+      const preppedFiles: FileReadyForCompressing[] = Array.from(files).map((file) => {
+        const { name, size } = file;
 
-    // prepare files for compression
-    const preppedFiles: FileReadyForCompressing[] = Array.from(files).map((file) => {
-      const { name, size, type } = file;
+        return {
+          file,
+          large: size > MAX_FILE_SIZE,
+          name,
+          size
+        };
+      });
 
-      return {
-        file,
-        large: size > MAX_FILE_SIZE,
-        name,
-        size,
-        type
-      };
-    });
+      setFilesBeingCompressed(preppedFiles);
+      setDropAreaInUse(false);
 
-    // setImagesReadyToCompress(preppedFiles);
-
-    setDropAreaInUse(false);
-    handleFiles(preppedFiles);
+      handleFiles(preppedFiles);
+    }
   };
 
   // reusable function to handle drag events
@@ -210,10 +197,96 @@ const CompressorV2 = () => {
         <small>Up to 20 images, max 4 MB each.</small>
       </form>
 
-      {compressedImages.length ? (
+      {filesBeingCompressed.length ? (
         <section className="results">
           <ul id="results__list" className="results__list">
-            {compressedImages.map((compressedImage) => {
+            {filesBeingCompressed.map((file, index) => {
+              return (
+                <li key={file.name}>
+                  <div>
+                    <p className="results__title">{file.name}</p>
+                    <p className="results__size">{getFileSizeString(file.size)}</p>
+                  </div>
+
+                  <span
+                    className={`results__bar results__bar--${
+                      isCompressing ? "compressing" : "complete"
+                    }`}
+                  >
+                    {isCompressing ? "Compressing..." : "Complete!"}
+                  </span>
+
+                  <div>
+                    <p>
+                      {compressedFiles[index] &&
+                      compressedFiles.find((compressedFile) => compressedFile.name === file.name)
+                        ? compressedFiles[index].newFileSizeString
+                        : "..."}
+                    </p>
+
+                    {/* find the matching file in compressedFiles state by fileName */}
+                    {/* {compressedFiles[index] && compressedFiles.find((f) => f.name === file.name) ? (
+                      <p>{compressedFiles[index].newFileSizeString}</p>
+                    ) : (
+                      <p>...</p>
+                    )} */}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* {compressedFiles.length ? (
+        <section className="results">
+          <ul id="results__list" className="results__list">
+            {compressedFiles.map((compressedImage) => {
+              return (
+                <li key={compressedImage.originalFile.name}>
+                  <div>
+                    <p className="results__title">{compressedImage.originalFile.name}</p>
+                    <p className="results__size">{compressedImage.originalFileSizeString}</p>
+                  </div>
+
+                  <span
+                    className={`results__bar results__bar--${
+                      compressedImage.failedToCompress ? "error" : "complete"
+                    }`}
+                  >
+                    {compressedImage.failedToCompress && "Failed to compress"}
+                    {!compressedImage.failedToCompress && "Complete!"}
+                  </span>
+
+                  <div>
+                    <p>{compressedImage.newFileSizeString}</p>
+
+                    <div className="divDL">
+                      {!isCompressing ? (
+                        <p className="results__download">
+                          <a
+                            href={URL.createObjectURL(compressedImage.newFile)}
+                            download={compressedImage.fileName}
+                          >
+                            Download
+                          </a>
+                        </p>
+                      ) : null}
+
+                      <p>{`-${compressedImage.percentSaved}%`}</p>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null} */}
+
+      {/* {compressedFiles.length ? (
+        <section className="results"> 
+          <ul id="results__list" className="results__list">  
+            {compressedFiles.map((compressedImage) => {
               return (
                 <li key={compressedImage.originalFile.name}>
                   <div>
@@ -226,8 +299,6 @@ const CompressorV2 = () => {
                       isCompressing ? "compressing" : "complete"
                     } ${compressedImage.failedToCompress ? "results__bar--error" : undefined}`}
                   >
-                    {/* {isCompressing ? "Compressing..." : "Complete!"} */}
-
                     {compressedImage.failedToCompress && "Failed to compress"}
                     {!compressedImage.failedToCompress && isCompressing && "Compressing..."}
                     {!compressedImage.failedToCompress && !isCompressing && "Complete!"}
@@ -248,7 +319,6 @@ const CompressorV2 = () => {
                         </p>
                       ) : null}
 
-                      {/* display percentSaved with 2 decimal points */}
                       <p>{`-${compressedImage.percentSaved}%`}</p>
                     </div>
                   </div>
@@ -257,9 +327,51 @@ const CompressorV2 = () => {
             })}
           </ul>
         </section>
-      ) : null}
+      ) : null} */}
     </>
   );
 };
 
 export { CompressorV2 };
+
+const original = [
+  {
+    file: {},
+    large: false,
+    name: "Screenshot from 2023-08-04 11-03-09.png",
+    size: 252988
+  },
+  {
+    file: {},
+    large: false,
+    name: "Screenshot from 2023-08-24 13-20-17.png",
+    size: 601745
+  }
+];
+
+const compressed = [
+  {
+    failedToCompress: false,
+    name: "Screenshot from 2023-08-04 11-03-09.png",
+    newFile: {
+      name: "Screenshot from 2023-08-04 11-03-09.png",
+      lastModified: 1696916365374
+    },
+    newFileSizeString: "247.1 KB",
+    originalFile: {},
+    originalFileSizeString: "247.1 KB",
+    percentSaved: 0
+  },
+  {
+    failedToCompress: false,
+    name: "Screenshot from 2023-08-24 13-20-17.png",
+    newFile: {
+      name: "Screenshot from 2023-08-24 13-20-17.png",
+      lastModified: 1693947762122
+    },
+    newFileSizeString: "279.5 KB",
+    originalFile: {},
+    originalFileSizeString: "587.6 KB",
+    percentSaved: 52.43
+  }
+];
