@@ -1,18 +1,19 @@
 import { Box, DownloadCloud } from "lucide-react";
+import { handleDownloadAll, handleSaveToDropbox } from "@/lib/utils";
+import type { Result } from "@/types";
 
 type ButtonRowProps = {
-  handleDownloadAll: () => void;
-  handleSaveToDropbox: () => void;
+  results: Result[];
 };
 
-const ButtonRow = ({ handleDownloadAll, handleSaveToDropbox }: ButtonRowProps) => {
+const ButtonRow = ({ results }: ButtonRowProps) => {
   return (
     <section className="results__download-buttons">
-      <button className="results__dropbox" onClick={handleSaveToDropbox}>
+      <button className="results__dropbox" onClick={() => handleSaveToDropbox(results)}>
         <Box /> Save to Dropbox
       </button>
 
-      <button className="results__download-all" onClick={handleDownloadAll}>
+      <button className="results__download-all" onClick={() => handleDownloadAll(results)}>
         <DownloadCloud /> Download All
       </button>
     </section>

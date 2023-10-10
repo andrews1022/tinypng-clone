@@ -1,7 +1,5 @@
 "use client";
 
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
 import { useEffect, useState } from "react";
 
 import { ButtonRow } from "@/components/button-row";
@@ -29,8 +27,8 @@ const Compressor = () => {
   const [results, setResults] = useState<Result[]>([]);
   const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
 
+  // check if all images are done compressing
   useEffect(() => {
-    // check if all images are done compressing
     const compressingImages = results.filter((result) => !result.newFileSizeString);
 
     if (!compressingImages.length && results.length) {
@@ -45,9 +43,13 @@ const Compressor = () => {
     };
   }, [results]); // useEffect will run whenever results state changes
   // explaination of useEffect above:
-  // In this code, the useEffect hook runs whenever the results state changes. It filters the results array to find images that are still compressing (where newFileSizeString is an empty string). If there are no compressing images and the results array is not empty, it means all images are done compressing, and setAllImagesDoneCompressing(true) is called. Otherwise, setAllImagesDoneCompressing(false) is set. This ensures that allImagesDoneCompressing reflects the correct state based on the compression status of all images.
+  // the useEffect hook runs whenever the results state changes
+  // it filters the results array to find images that are still compressing (where newFileSizeString is an empty string)
+  // if there are no compressing images and the results array is not empty, it means all images are done compressing, and setAllImagesDoneCompressing(true) is called
+  // otherwise, setAllImagesDoneCompressing(false) is set
+  // this ensures that allImagesDoneCompressing reflects the correct state based on the compression status of all images
 
-  const checkIfTooManyFiles = (files: FileList) => {
+  const checkIfTooManyFiles = (files: File[]) => {
     if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
       setDropAreaInUse(false);
       return alert("Too many files! Please upload no more than 20 files at once.");
@@ -96,11 +98,11 @@ const Compressor = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleFiles = (files: FileList) => {
+  const handleFiles = (files: File[]) => {
     const filesArray = Array.from(files);
 
     filesArray.forEach((file) => {
-      // check if the file is already in the results array (has been compressed)
+      // check if the file is already in the results array (file has been compressed)
       const isAlreadyCompressed = results.some((result) => result.fileName === file.name);
 
       // skip files that have already been compressed
@@ -116,18 +118,20 @@ const Compressor = () => {
 
       const fileName = file.name;
 
-      setResults((prevResults) => [
-        ...prevResults,
-        {
-          originalFile: file,
-          newFile: file,
-          fileName,
-          originalFileSizeString: getFileSizeString(file.size),
-          newFileSizeString: "",
-          percentSaved: 0,
-          isCompressing: true // set isCompressing to true for newly added files
-        }
-      ]);
+      setResults((prevResults) => {
+        return [
+          ...prevResults,
+          {
+            originalFile: file,
+            newFile: file,
+            fileName,
+            originalFileSizeString: getFileSizeString(file.size),
+            newFileSizeString: "",
+            percentSaved: 0,
+            isCompressing: true // set isCompressing to true for newly added files
+          }
+        ];
+      });
 
       uploadFile(file, fileName);
     });
@@ -139,10 +143,10 @@ const Compressor = () => {
     const { files } = event.dataTransfer;
 
     if (files) {
-      checkIfTooManyFiles(files);
+      const filesArray = Array.from(files);
 
-      handleFiles(files);
-
+      checkIfTooManyFiles(filesArray);
+      handleFiles(filesArray);
       setDropAreaInUse(false);
     }
   };
@@ -153,10 +157,10 @@ const Compressor = () => {
     const { files } = event.target;
 
     if (files) {
-      checkIfTooManyFiles(files);
+      const filesArray = Array.from(files);
 
-      handleFiles(files);
-
+      checkIfTooManyFiles(filesArray);
+      handleFiles(filesArray);
       setDropAreaInUse(false);
     }
   };
@@ -165,59 +169,6 @@ const Compressor = () => {
   const handleDragEvents = (event: DragEvent<HTMLFormElement>, dropAreaInUse: boolean) => {
     event.preventDefault();
     setDropAreaInUse(dropAreaInUse);
-  };
-
-  const totalPercentSaved = results
-    .reduce((total, result) => {
-      return total + result.percentSaved;
-    }, 0)
-    .toFixed(2);
-  // In this code, totalPercentSaved is calculated by using the reduce function on the results array. It adds up the individual percentSaved values for each image and formats the result to have 2 decimal places.
-
-  const totalSizeSaved = results.reduce((total, result) => {
-    const originalSize = result.originalFile.size;
-    const newSize = result.newFile.size;
-    const sizeDifference = originalSize - newSize;
-    return total + sizeDifference;
-  }, 0);
-  // In this code, totalSizeSaved is calculated by using the reduce function similarly to the total percent saved. It adds up the differences in file sizes (in bytes) for each image.
-
-  const handleDownloadAll = () => {
-    const zip = new JSZip();
-
-    results.forEach((result) => {
-      zip.file(result.fileName, result.newFile);
-    });
-
-    zip.generateAsync({ type: "blob" }).then((content) => {
-      saveAs(content, "tinified.zip");
-    });
-  };
-
-  const handleSaveToDropbox = () => {
-    const options = {
-      // Add file objects to save to Dropbox here (save the compressed images). For example:
-      // { url: "URL_TO_YOUR_FILE", filename: "FILENAME_ON_DROPBOX" }
-      files: results.map((result) => ({
-        // FYI: having "blob:" causes the following error: r: {"error": "Url \"blob:...\" uses unsupported scheme"}
-        url: URL.createObjectURL(result.newFile).replace("blob:", "data:"),
-        filename: result.fileName
-      })),
-      // Success callback when all files have been saved
-      success: () => {
-        console.log("success!");
-      },
-      // Error callback when all files have failed to save
-      error: (error: any) => {
-        console.error("error: ", error);
-      },
-      // Progress callback called every time a file has been successfully saved
-      progress: (progress: number) => {
-        console.log("progress: ", progress);
-      }
-    };
-
-    window.Dropbox.save(options);
   };
 
   return (
@@ -233,12 +184,9 @@ const Compressor = () => {
 
       {allImagesDoneCompressing && results.length ? (
         <>
-          <ButtonRow
-            handleDownloadAll={handleDownloadAll}
-            handleSaveToDropbox={handleSaveToDropbox}
-          />
+          <ButtonRow results={results} />
 
-          <Totals totalPercentSaved={totalPercentSaved} totalSizeSaved={totalSizeSaved} />
+          <Totals results={results} />
         </>
       ) : null}
     </>
