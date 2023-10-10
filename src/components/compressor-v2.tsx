@@ -24,17 +24,92 @@ type FileReadyForCompressing = {
   type: string;
 };
 
+type CompressedFile = {
+  failedToCompress: boolean;
+  fileName: string;
+  newFile: File;
+  newFileSizeString: string;
+  originalFile: File;
+  originalFileSizeString: string;
+  percentSaved: number;
+};
+
 // constants
 const MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE = 20;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
 const CompressorV2 = () => {
   // state
+  const [compressedImages, setCompressedImages] = useState<CompressedFile[]>([]);
   const [dropAreaInUse, setDropAreaInUse] = useState(false);
-  const [imagesReadyToCompress, setImagesReadyToCompress] = useState<FileReadyForCompressing[]>([]);
+  const [isCompressing, setIsCompressing] = useState(true);
+
+  const checkIfTooManyFiles = (files: FileList) => {
+    if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
+      setDropAreaInUse(false);
+      return alert("Too many files! Please upload no more than 20 files at once.");
+    }
+  };
+
+  const uploadFile = async (fileToCompress: FileReadyForCompressing) => {
+    const reader = new FileReader();
+    const { file, large, name, size, type } = fileToCompress;
+
+    reader.addEventListener("loadend", async (event) => {
+      try {
+        // check if large is true
+        // if it is, don't compress, just add to compressedImages state
+        if (large) {
+          const compressedImage: CompressedFile = {
+            failedToCompress: true,
+            fileName: name,
+            newFile: file,
+            newFileSizeString: getFileSizeString(size),
+            originalFile: file,
+            originalFileSizeString: getFileSizeString(size),
+            percentSaved: 0
+          };
+
+          setCompressedImages((previousCompressedImages) => [
+            ...previousCompressedImages,
+            compressedImage
+          ]);
+          return;
+        }
+
+        const compressedFile = await compressFile(file);
+
+        const orginalSize = file.size;
+        const newSize = compressedFile.size;
+        const reduction = ((orginalSize - newSize) / orginalSize) * 100;
+
+        const compressedImage: CompressedFile = {
+          failedToCompress: false,
+          fileName: name,
+          newFile: compressedFile,
+          newFileSizeString: getFileSizeString(newSize),
+          originalFile: file,
+          originalFileSizeString: getFileSizeString(orginalSize),
+          percentSaved: parseFloat(reduction.toFixed(2))
+        };
+
+        setCompressedImages((previousCompressedImages) => [
+          ...previousCompressedImages,
+          compressedImage
+        ]);
+        setIsCompressing(false);
+      } catch (error) {
+        console.error("Error compressing file: ", error);
+      }
+    });
+
+    reader.readAsDataURL(fileToCompress.file);
+  };
 
   const handleFiles = (files: FileReadyForCompressing[]) => {
-    console.log("files --> ", files);
+    files.forEach((file) => {
+      uploadFile(file);
+    });
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -42,10 +117,12 @@ const CompressorV2 = () => {
     // console.log(files);
 
     if (files) {
-      if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
-        setDropAreaInUse(false);
-        return alert("Too many files! Please upload no more than 20 files at once.");
-      }
+      // if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
+      //   setDropAreaInUse(false);
+      //   return alert("Too many files! Please upload no more than 20 files at once.");
+      // }
+
+      checkIfTooManyFiles(files);
 
       // prepare files for compression
       const preppedFiles: FileReadyForCompressing[] = Array.from(files).map((file) => {
@@ -73,10 +150,12 @@ const CompressorV2 = () => {
     const { files } = event.dataTransfer;
     // console.log(files);
 
-    if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
-      setDropAreaInUse(false);
-      return alert("Too many files! Please upload no more than 20 files at once.");
-    }
+    // if (files.length > MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE) {
+    //   setDropAreaInUse(false);
+    //   return alert("Too many files! Please upload no more than 20 files at once.");
+    // }
+
+    checkIfTooManyFiles(files);
 
     // prepare files for compression
     const preppedFiles: FileReadyForCompressing[] = Array.from(files).map((file) => {
@@ -130,6 +209,55 @@ const CompressorV2 = () => {
         />
         <small>Up to 20 images, max 4 MB each.</small>
       </form>
+
+      {compressedImages.length ? (
+        <section className="results">
+          <ul id="results__list" className="results__list">
+            {compressedImages.map((compressedImage) => {
+              return (
+                <li key={compressedImage.originalFile.name}>
+                  <div>
+                    <p className="results__title">{compressedImage.originalFile.name}</p>
+                    <p className="results__size">{compressedImage.originalFileSizeString}</p>
+                  </div>
+
+                  <span
+                    className={`results__bar results__bar--${
+                      isCompressing ? "compressing" : "complete"
+                    } ${compressedImage.failedToCompress ? "results__bar--error" : undefined}`}
+                  >
+                    {/* {isCompressing ? "Compressing..." : "Complete!"} */}
+
+                    {compressedImage.failedToCompress && "Failed to compress"}
+                    {!compressedImage.failedToCompress && isCompressing && "Compressing..."}
+                    {!compressedImage.failedToCompress && !isCompressing && "Complete!"}
+                  </span>
+
+                  <div>
+                    <p>{compressedImage.newFileSizeString}</p>
+
+                    <div className="divDL">
+                      {!isCompressing ? (
+                        <p className="results__download">
+                          <a
+                            href={URL.createObjectURL(compressedImage.newFile)}
+                            download={compressedImage.fileName}
+                          >
+                            Download
+                          </a>
+                        </p>
+                      ) : null}
+
+                      {/* display percentSaved with 2 decimal points */}
+                      <p>{`-${compressedImage.percentSaved}%`}</p>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 };
