@@ -23,7 +23,6 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 const Compressor = () => {
   // state
   const [failedToCompress, setFailedToCompress] = useState(false);
-  // const [isCompressing, setIsCompressing] = useState(true);
   const [dropAreaInUse, setDropAreaInUse] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [allImagesDoneCompressing, setAllImagesDoneCompressing] = useState(false);
@@ -86,8 +85,6 @@ const Compressor = () => {
 
             return newResults;
           });
-
-          // setIsCompressing(false);
         } catch (error) {
           console.error(error);
         }
@@ -100,14 +97,13 @@ const Compressor = () => {
   const handleFiles = (files: FileList) => {
     const filesArray = Array.from(files);
 
-    // setIsCompressing(true);
-
     filesArray.forEach((file) => {
-      // Check if the file is already in the results array (has been compressed)
+      // check if the file is already in the results array (has been compressed)
       const isAlreadyCompressed = results.some((result) => result.fileName === file.name);
 
+      // skip files that have already been compressed
       if (isAlreadyCompressed) {
-        return; // Skip files that have already been compressed
+        return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
@@ -127,7 +123,7 @@ const Compressor = () => {
           originalFileSizeString: getFileSizeString(file.size),
           newFileSizeString: "",
           percentSaved: 0,
-          isCompressing: true // Set isCompressing to true for newly added files
+          isCompressing: true // set isCompressing to true for newly added files
         }
       ]);
 

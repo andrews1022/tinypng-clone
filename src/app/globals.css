@@ -99,7 +99,6 @@ header {
 }
 
 .droparea:hover {
-  /* color: #616778; */
   border-color: #f59e0b;
 }
 
@@ -116,10 +115,6 @@ header {
 .droparea--in-use {
   border-color: #f59e0b;
 }
-
-/* .green-border {
-  border-color: #00c300;
-} */
 
 /*==== results section ====*/
 
@@ -138,8 +133,6 @@ header {
 }
 
 .results__list-item {
-  /* display: flex; */
-  /* justify-content: space-between; */
   font-size: 0.8rem;
   margin: 4px;
   padding: 0.5rem;
@@ -170,7 +163,6 @@ header {
 }
 
 .results__title {
-  /* flex: 1 0 12.5rem; */
   max-width: 12.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -293,13 +285,10 @@ header {
 }
 
 .results__download {
-  /* text-align: right; */
-  /* width: 100%; */
 }
 
 .results__download a {
   cursor: pointer;
-  /* padding-left: 0.3rem; */
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -313,7 +302,6 @@ header {
 }
 
 .results__percent-saved {
-  /* margin-left: 1rem; */
   min-width: 4rem;
 }
 
