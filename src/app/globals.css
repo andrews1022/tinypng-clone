@@ -137,9 +137,9 @@ header {
   width: 100%;
 }
 
-.results__list li {
-  display: flex;
-  justify-content: space-between;
+.results__list-item {
+  /* display: flex; */
+  /* justify-content: space-between; */
   font-size: 0.8rem;
   margin: 4px;
   padding: 0.5rem;
@@ -147,10 +147,21 @@ header {
   background-color: rgb(240, 240, 240);
 }
 
-.results__list div {
-  width: 33%;
+.results__list-item-row {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  column-gap: 0.5rem;
+}
+
+.results__list-item-left-box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.5rem;
+}
+
+.results__list-item-right-box {
+  display: flex;
   align-items: center;
 }
 
@@ -158,25 +169,22 @@ header {
   width: 100%;
 }
 
-.results__list p {
+.results__title {
+  /* flex: 1 0 12.5rem; */
+  max-width: 12.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.results__title {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  padding-right: 0.3rem;
-}
-
 .results__bar {
-  width: 33%;
-  max-width: 292px;
+  display: flex;
+  align-items: center;
+  min-width: 18rem;
+  justify-content: center;
+  border-radius: 2rem;
   height: 30px;
   position: relative;
-  border-radius: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 :root {
@@ -206,6 +214,10 @@ header {
 
 .results__bar--error {
   background: #f33737;
+}
+
+.results__new-size {
+  margin-right: auto;
 }
 
 ::-moz-progress-bar {
@@ -261,15 +273,27 @@ header {
 }
 
 .results__size {
-  display: none;
   color: #7eb631;
   font-size: 0.7rem;
   min-width: 52px;
 }
 
+.results__compressed {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.results__download-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 1rem;
+}
+
 .results__download {
-  width: 100%;
-  text-align: right;
+  /* text-align: right; */
+  /* width: 100%; */
 }
 
 .results__download a {
@@ -285,6 +309,10 @@ header {
 .results__download a:active,
 .results__download a:visited {
   color: #333;
+}
+
+.results__percent-saved {
+  margin-left: 1rem;
 }
 
 .results__download-all {
@@ -382,22 +410,4 @@ header {
 
 .block {
   display: block;
-}
-
-@media only screen and (min-width: 480px) {
-  .droparea p:first-of-type {
-    font-size: 1rem;
-  }
-  .results__download {
-    text-align: center;
-  }
-  .results__saved {
-    display: block;
-  }
-}
-
-@media only screen and (min-width: 640px) {
-  .results__size {
-    display: block;
-  }
 }

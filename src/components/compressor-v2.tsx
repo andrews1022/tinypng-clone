@@ -33,6 +33,14 @@ type CompressedFile = {
   percentSaved: number;
 };
 
+type CompressionResult = {
+  failedToCompress: boolean;
+  name: string;
+  file: File;
+  size: number;
+  percentSaved: number;
+};
+
 // constants
 const MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE = 20;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
@@ -42,7 +50,6 @@ const CompressorV2 = () => {
   const [dropAreaInUse, setDropAreaInUse] = useState(false);
   const [compressedFiles, setCompressedFiles] = useState<CompressedFile[]>([]);
   const [filesBeingCompressed, setFilesBeingCompressed] = useState<FileReadyForCompressing[]>([]);
-  // const [compressionResults, setCompressionResults] = useState([]);
   const [isCompressing, setIsCompressing] = useState(true);
 
   const checkIfTooManyFiles = (files: FileList) => {
@@ -202,34 +209,24 @@ const CompressorV2 = () => {
           <ul id="results__list" className="results__list">
             {filesBeingCompressed.map((file, index) => {
               return (
-                <li key={file.name}>
-                  <div>
-                    <p className="results__title">{file.name}</p>
-                    <p className="results__size">{getFileSizeString(file.size)}</p>
-                  </div>
+                <li key={file.name} className="results__list-item">
+                  <div className="results__list-item-row">
+                    <div className="results__list-item-left-box">
+                      <p className="results__title">{file.name}</p>
+                      <p className="results__size">{getFileSizeString(file.size)}</p>
 
-                  <span
-                    className={`results__bar results__bar--${
-                      isCompressing ? "compressing" : "complete"
-                    }`}
-                  >
-                    {isCompressing ? "Compressing..." : "Complete!"}
-                  </span>
+                      <span
+                        className={`results__bar results__bar--${
+                          isCompressing ? "compressing" : "complete"
+                        }`}
+                      >
+                        {isCompressing ? "Compressing..." : "Complete!"}
+                      </span>
+                    </div>
 
-                  <div>
-                    <p>
-                      {compressedFiles[index] &&
-                      compressedFiles.find((compressedFile) => compressedFile.name === file.name)
-                        ? compressedFiles[index].newFileSizeString
-                        : "..."}
-                    </p>
-
-                    {/* find the matching file in compressedFiles state by fileName */}
-                    {/* {compressedFiles[index] && compressedFiles.find((f) => f.name === file.name) ? (
-                      <p>{compressedFiles[index].newFileSizeString}</p>
-                    ) : (
-                      <p>...</p>
-                    )} */}
+                    <div className="results__list-item-right-box">
+                      <p>Display resutls here</p>
+                    </div>
                   </div>
                 </li>
               );
@@ -237,141 +234,8 @@ const CompressorV2 = () => {
           </ul>
         </section>
       ) : null}
-
-      {/* {compressedFiles.length ? (
-        <section className="results">
-          <ul id="results__list" className="results__list">
-            {compressedFiles.map((compressedImage) => {
-              return (
-                <li key={compressedImage.originalFile.name}>
-                  <div>
-                    <p className="results__title">{compressedImage.originalFile.name}</p>
-                    <p className="results__size">{compressedImage.originalFileSizeString}</p>
-                  </div>
-
-                  <span
-                    className={`results__bar results__bar--${
-                      compressedImage.failedToCompress ? "error" : "complete"
-                    }`}
-                  >
-                    {compressedImage.failedToCompress && "Failed to compress"}
-                    {!compressedImage.failedToCompress && "Complete!"}
-                  </span>
-
-                  <div>
-                    <p>{compressedImage.newFileSizeString}</p>
-
-                    <div className="divDL">
-                      {!isCompressing ? (
-                        <p className="results__download">
-                          <a
-                            href={URL.createObjectURL(compressedImage.newFile)}
-                            download={compressedImage.fileName}
-                          >
-                            Download
-                          </a>
-                        </p>
-                      ) : null}
-
-                      <p>{`-${compressedImage.percentSaved}%`}</p>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null} */}
-
-      {/* {compressedFiles.length ? (
-        <section className="results"> 
-          <ul id="results__list" className="results__list">  
-            {compressedFiles.map((compressedImage) => {
-              return (
-                <li key={compressedImage.originalFile.name}>
-                  <div>
-                    <p className="results__title">{compressedImage.originalFile.name}</p>
-                    <p className="results__size">{compressedImage.originalFileSizeString}</p>
-                  </div>
-
-                  <span
-                    className={`results__bar results__bar--${
-                      isCompressing ? "compressing" : "complete"
-                    } ${compressedImage.failedToCompress ? "results__bar--error" : undefined}`}
-                  >
-                    {compressedImage.failedToCompress && "Failed to compress"}
-                    {!compressedImage.failedToCompress && isCompressing && "Compressing..."}
-                    {!compressedImage.failedToCompress && !isCompressing && "Complete!"}
-                  </span>
-
-                  <div>
-                    <p>{compressedImage.newFileSizeString}</p>
-
-                    <div className="divDL">
-                      {!isCompressing ? (
-                        <p className="results__download">
-                          <a
-                            href={URL.createObjectURL(compressedImage.newFile)}
-                            download={compressedImage.fileName}
-                          >
-                            Download
-                          </a>
-                        </p>
-                      ) : null}
-
-                      <p>{`-${compressedImage.percentSaved}%`}</p>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null} */}
     </>
   );
 };
 
 export { CompressorV2 };
-
-const original = [
-  {
-    file: {},
-    large: false,
-    name: "Screenshot from 2023-08-04 11-03-09.png",
-    size: 252988
-  },
-  {
-    file: {},
-    large: false,
-    name: "Screenshot from 2023-08-24 13-20-17.png",
-    size: 601745
-  }
-];
-
-const compressed = [
-  {
-    failedToCompress: false,
-    name: "Screenshot from 2023-08-04 11-03-09.png",
-    newFile: {
-      name: "Screenshot from 2023-08-04 11-03-09.png",
-      lastModified: 1696916365374
-    },
-    newFileSizeString: "247.1 KB",
-    originalFile: {},
-    originalFileSizeString: "247.1 KB",
-    percentSaved: 0
-  },
-  {
-    failedToCompress: false,
-    name: "Screenshot from 2023-08-24 13-20-17.png",
-    newFile: {
-      name: "Screenshot from 2023-08-24 13-20-17.png",
-      lastModified: 1693947762122
-    },
-    newFileSizeString: "279.5 KB",
-    originalFile: {},
-    originalFileSizeString: "587.6 KB",
-    percentSaved: 52.43
-  }
-];

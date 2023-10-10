@@ -217,7 +217,7 @@ const Compressor = () => {
   return (
     <>
       <section
-        className={`droparea ${isActive ? "green-border" : undefined}`}
+        className={`droparea ${isActive ? "droparea--in-use" : ""}`}
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -234,24 +234,22 @@ const Compressor = () => {
           <ul id="results__list" className="results__list">
             {results.map((result) => {
               return (
-                <li key={result.originalFile.name}>
-                  <div>
+                <li key={result.originalFile.name} className="results__list-item">
+                  <div className="results__list-item-row">
                     <p className="results__title">{result.originalFile.name}</p>
                     <p className="results__size">{result.originalFileSizeString}</p>
-                  </div>
 
-                  <span
-                    className={`results__bar results__bar--${
-                      isCompressing ? "compressing" : "complete"
-                    } ${failedToCompress ? "results__bar--error" : undefined}`}
-                  >
-                    {isCompressing ? "Compressing..." : "Complete!"}
-                  </span>
+                    <span
+                      className={`results__bar results__bar--${
+                        isCompressing ? "compressing" : "complete"
+                      } ${failedToCompress ? "results__bar--error" : undefined}`}
+                    >
+                      {isCompressing ? "Compressing..." : "Complete!"}
+                    </span>
 
-                  <div>
-                    <p>{result.newFileSizeString}</p>
+                    <div className="results__compressed">
+                      <p className="results__new-size">{result.newFileSizeString}</p>
 
-                    <div className="divDL">
                       {!isCompressing ? (
                         <p className="results__download">
                           <a href={URL.createObjectURL(result.newFile)} download={result.fileName}>
@@ -260,8 +258,7 @@ const Compressor = () => {
                         </p>
                       ) : null}
 
-                      {/* display percentSaved with 2 decimal points */}
-                      <p>{`-${result.percentSaved}%`}</p>
+                      <p className="results__percent-saved">{`-${result.percentSaved}%`}</p>
                     </div>
                   </div>
                 </li>
@@ -272,7 +269,7 @@ const Compressor = () => {
       ) : null}
 
       {allImagesDoneCompressing ? (
-        <section className="download-buttons">
+        <section className="results__download-buttons">
           <button className="results__dropbox" onClick={handleSaveToDropbox}>
             <Box /> Save to Dropbox
           </button>
