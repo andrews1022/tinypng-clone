@@ -2,24 +2,25 @@
 
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
-import { Box, Download, DownloadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { ButtonRow } from "@/components/button-row";
+import { DropArea } from "@/components/drop-area";
+import { ResultList } from "@/components/result-list";
+import { Totals } from "@/components/totals";
+
+import { MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE, MAX_FILE_SIZE } from "@/constants";
 
 import { compressFile, getFileSizeString } from "@/lib/utils";
 
 import type { ChangeEvent, DragEvent } from "react";
 import type { Result } from "@/types";
-import { DropArea } from "./drop-area";
 
 declare global {
   interface Window {
     Dropbox: any;
   }
 }
-
-// constants
-const MAX_NUMBER_OF_FILES_UPLOADED_AT_ONCE = 20;
-const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
 const Compressor = () => {
   // state
@@ -228,65 +229,16 @@ const Compressor = () => {
         handleDrop={handleDrop}
       />
 
-      {results.length ? (
-        <section className="results">
-          <ul id="results__list" className="results__list">
-            {results.map((result) => {
-              return (
-                <li key={result.originalFile.name} className="results__list-item">
-                  <div className="results__list-item-row">
-                    <p className="results__title">{result.originalFile.name}</p>
-                    <p className="results__size">{result.originalFileSizeString}</p>
-
-                    <span
-                      className={`results__bar results__bar--${
-                        result.isCompressing ? "compressing" : "complete"
-                      } ${failedToCompress ? "results__bar--error" : undefined}`}
-                    >
-                      {result.isCompressing ? "Compressing..." : "Complete!"}
-                    </span>
-
-                    <div className="results__compressed">
-                      <p className="results__new-size">{result.newFileSizeString}</p>
-
-                      {!result.isCompressing ? (
-                        <a
-                          href={URL.createObjectURL(result.newFile)}
-                          download={result.fileName}
-                          className="results__download"
-                        >
-                          Download
-                        </a>
-                      ) : null}
-
-                      <p className="results__percent-saved">{`-${result.percentSaved}%`}</p>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
+      {results.length ? <ResultList failedToCompress={failedToCompress} results={results} /> : null}
 
       {allImagesDoneCompressing && results.length ? (
         <>
-          <section className="results__download-buttons">
-            <button className="results__dropbox" onClick={handleSaveToDropbox}>
-              <Box /> Save to Dropbox
-            </button>
+          <ButtonRow
+            handleDownloadAll={handleDownloadAll}
+            handleSaveToDropbox={handleSaveToDropbox}
+          />
 
-            <button className="results__download-all" onClick={handleDownloadAll}>
-              <DownloadCloud /> Download All
-            </button>
-          </section>
-
-          <section className="totals">
-            <p className="totals__message">
-              We just saved you <span className="totals__percent">{totalPercentSaved}%</span>
-              <span className="totals__size-saved">{getFileSizeString(totalSizeSaved)} total</span>
-            </p>
-          </section>
+          <Totals totalPercentSaved={totalPercentSaved} totalSizeSaved={totalSizeSaved} />
         </>
       ) : null}
     </>
