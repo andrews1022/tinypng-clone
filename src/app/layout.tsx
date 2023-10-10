@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -22,6 +23,13 @@ const RootLayout = ({ children }: RootLayoutProps) => {
       <body className={inter.className}>
         <main>{children}</main>
       </body>
+
+      <Script
+        type="text/javascript"
+        src="https://www.dropbox.com/static/api/2/dropins.js"
+        id="dropboxjs"
+        data-app-key={process.env.DROPBOX_APP_KEY}
+      />
     </html>
   );
 };

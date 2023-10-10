@@ -300,10 +300,33 @@ header {
   border-bottom-color: #029c6b;
 }
 
+.results__dropbox {
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-bottom: 0.3rem solid #788990;
+  border-radius: 0.2rem;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #1081de;
+  border-bottom-color: #056ec5;
+  text-shadow: 0.1rem 0.1rem 0 #0561ae;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.results__dropbox:hover {
+  background-color: #088cf9;
+  border-bottom-color: #0575d1;
+}
+
 .download-buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
 }
 
 .totals {
