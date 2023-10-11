@@ -137,17 +137,21 @@ const Compressor = () => {
     });
   };
 
+  const prepareFilesForUpload = (files: FileList) => {
+    const filesArray = Array.from(files);
+
+    checkIfTooManyFiles(filesArray);
+    handleFiles(filesArray);
+    setDropAreaInUse(false);
+  };
+
   const handleDrop = (event: DragEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const { files } = event.dataTransfer;
 
     if (files) {
-      const filesArray = Array.from(files);
-
-      checkIfTooManyFiles(filesArray);
-      handleFiles(filesArray);
-      setDropAreaInUse(false);
+      prepareFilesForUpload(files);
     }
   };
 
@@ -157,11 +161,7 @@ const Compressor = () => {
     const { files } = event.target;
 
     if (files) {
-      const filesArray = Array.from(files);
-
-      checkIfTooManyFiles(filesArray);
-      handleFiles(filesArray);
-      setDropAreaInUse(false);
+      prepareFilesForUpload(files);
     }
   };
 
@@ -172,7 +172,7 @@ const Compressor = () => {
   };
 
   return (
-    <>
+    <div className="compressor">
       <DropArea
         dropAreaInUse={dropAreaInUse}
         handleChange={handleChange}
@@ -189,7 +189,7 @@ const Compressor = () => {
           <Totals results={results} />
         </>
       ) : null}
-    </>
+    </div>
   );
 };
 
